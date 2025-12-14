@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ByteGenie — Hospitality Sales & Procurement Intelligence</title>
+  <meta name="description" content="AI-powered sales and procurement intelligence platform for hospitality and event-driven businesses, built on Google Cloud." />
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#0f172a;
+      --muted:#475569;
+      --line:rgba(15,23,42,.12);
+      --glass:rgba(255,255,255,.62);
+      --glass2:rgba(255,255,255,.42);
+      --shadow:0 18px 55px rgba(15,23,42,.12);
+      --pink1:rgba(255, 105, 180, .16);
+      --pink2:rgba(255, 182, 193, .22);
+      --pink3:rgba(255, 105, 180, .08);
+      --accent:#ff4fa3;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--ink);
+      overflow-x:hidden;
+    }
+
+    /* Subtle white + pink background */
+    .bg{
+      position:fixed; inset:0;
+      background:
+        radial-gradient(900px 500px at 15% 20%, var(--pink1), transparent 55%),
+        radial-gradient(800px 520px at 85% 15%, var(--pink2), transparent 60%),
+        radial-gradient(700px 520px at 70% 85%, var(--pink3), transparent 55%),
+        linear-gradient(180deg, #ffffff 0%, #ffffff 70%, rgba(255,240,248,.55) 100%);
+      z-index:-2;
+    }
+
+    /* Floating elements */
+    .float{
+      position:fixed;
+      width:240px; height:240px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(255,79,163,.18), rgba(255,255,255,.2));
+      border: 1px solid rgba(255,79,163,.18);
+      box-shadow: 0 22px 80px rgba(255,79,163,.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index:-1;
+      filter:saturate(1.05);
+      opacity:.9;
+    }
+    .float.a{left:-60px; top:90px; transform: rotate(8deg);}
+    .float.b{right:-80px; top:220px; width:280px; height:280px; transform: rotate(-10deg);}
+    .float.c{left:10%; bottom:-120px; width:340px; height:340px; border-radius: 38px; transform: rotate(12deg);}
+
+    /* Layout */
+    .wrap{
+      max-width:1180px;
+      margin:0 auto;
+      padding: 28px 18px 64px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      text-decoration:none; color:inherit;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background: linear-gradient(135deg, rgba(255,79,163,.22), rgba(255,255,255,.9));
+      border:1px solid rgba(255,79,163,.22);
+      box-shadow: 0 12px 35px rgba(15,23,42,.10);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo::after{
+      content:"";
+      position:absolute; inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.85), transparent 55%);
+      transform: rotate(25deg);
+    }
+    .brand h1{
+      font-size:16px; margin:0; letter-spacing:.2px;
+    }
+    .brand p{
+      margin:2px 0 0; color:var(--muted); font-size:12px;
+    }
+
+    nav{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    }
+    .chip{
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      text-decoration:none;
+      color: var(--ink);
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .chip:hover{transform: translateY(-1px); border-color: rgba(255,79,163,.35);}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.18fr .82fr;
+      gap: 18px;
+      align-items:start;
+      margin-top: 14px;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr; }
+      header{flex-direction:column; align-items:flex-start;}
+    }
+
+    /* Glass cards */
+    .card{
+      border:1px solid rgba(15,23,42,.10);
+      background: var(--glass);
+      box-shadow: var(--shadow);
+      border-radius: 22px;
+      padding: 18px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      background: radial-gradient(500px 220px at 20% 0%, rgba(255,79,163,.10), transparent 55%);
+      pointer-events:none;
+    }
+
+    .hero{
+      padding: 22px 20px;
+    }
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,79,163,.22);
+      background: rgba(255,255,255,.55);
+      color: rgba(120, 0, 60, .88);
+      font-size:12px;
+      letter-spacing:.2px;
+      margin-bottom: 10px;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(255,79,163,.12);
+    }
+    .hero h2{
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.1;
+      letter-spacing: -0.6px;
+    }
+    .hero p{
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 70ch;
+    }
+    .ctaRow{
+      display:flex; gap:10px; flex-wrap:wrap; margin-top: 6px;
+    }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.72);
+      color: var(--ink);
+      text-decoration:none;
+      font-weight: 600;
+      font-size: 13px;
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(255,79,163,.35); box-shadow: 0 12px 40px rgba(255,79,163,.10); }
+    .btn.primary{
+      border-color: rgba(255,79,163,.35);
+      background: linear-gradient(135deg, rgba(255,79,163,.18), rgba(255,255,255,.76));
+    }
+    .btn small{font-weight:500; color: var(--muted);}
+
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+    @media (max-width: 980px){ .stats{grid-template-columns: repeat(2, 1fr);} }
+    .stat{
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.55);
+      border-radius: 16px;
+      padding: 12px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .stat b{display:block; font-size: 16px;}
+    .stat span{display:block; margin-top: 4px; color: var(--muted); font-size: 12px;}
+
+    h3{
+      margin: 0 0 10px;
+      font-size: 16px;
+      letter-spacing: -0.2px;
+    }
+    ul{margin: 0; padding-left: 18px; color: var(--muted); line-height: 1.6;}
+    li{margin: 6px 0;}
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 620px){ .twoCol{grid-template-columns:1fr;} }
+
+    .pill{
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,79,163,.22);
+      background: rgba(255,255,255,.55);
+      font-size:12px;
+      color: rgba(120, 0, 60, .88);
+      margin: 4px 6px 0 0;
+      white-space:nowrap;
+    }
+
+    .stack{display:flex; flex-direction:column; gap: 12px;}
+    .mini{
+      background: var(--glass2);
+      border:1px solid rgba(15,23,42,.10);
+      border-radius: 18px;
+      padding: 14px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .codeTag{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.65);
+      color: rgba(15,23,42,.86);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    footer{
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap:wrap;
+    }
+    .link{
+      color: rgba(15,23,42,.85);
+      text-decoration:none;
+      border-bottom: 1px dashed rgba(255,79,163,.35);
+    }
+    .link:hover{border-bottom-style: solid;}
+
+    /* Tiny toast for copy button */
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(15,23,42,.86);
+      color: white;
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .toast.show{opacity:1; transform: translateX(-50%) translateY(-4px);}
+  </style>
+</head>
+
+<body>
+  <div class="bg"></div>
+  <div class="float a" aria-hidden="true"></div>
+  <div class="float b" aria-hidden="true"></div>
+  <div class="float c" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <header>
+      <a class="brand" href="#top">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>ByteGenie</h1>
+          <p>Hospitality Sales & Procurement Intelligence (Google Cloud)</p>
+        </div>
+      </a>
+      <nav>
+        <a class="chip" href="#solution">Solution</a>
+        <a class="chip" href="#features">Key Features</a>
+        <a class="chip" href="#gcp">Google Cloud Architecture</a>
+        <a class="chip" href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main class="grid" id="top">
+      <!-- LEFT COLUMN -->
+      <section class="card hero" id="solution">
+        <div class="kicker"><span class="dot" aria-hidden="true"></span> Built for hospitality sales & procurement teams</div>
+        <h2>AI-powered intelligence that finds leads, benchmarks prices, and automates data workflows.</h2>
+        <p>
+          ByteGenie helps hospitality teams increase sales and cut procurement costs with a Bloomberg-like data platform.
+          It continuously collects and standardizes real-time data from events, locations, company sites, ecommerce platforms,
+          and industry sources to power lead generation, event intelligence, price benchmarking, and supplier intelligence.
+        </p>
+
+        <div class="ctaRow">
+          <a class="btn primary" href="#contact">Request a demo <small>via email</small></a>
+          <button class="btn" id="copyEmail" type="button">Copy email <span class="codeTag">jiale@byte-genie.cloud</span></button>
+          <a class="btn" href="#gcp">View GCP stack</a>
+        </div>
+
+        <div class="stats" aria-label="Impact metrics">
+          <div class="stat"><b>&gt;10×</b><span>Qualified leads</span></div>
+          <div class="stat"><b>&gt;85%</b><span>Less research time</span></div>
+          <div class="stat"><b>&gt;20×</b><span>Sales efficiency</span></div>
+          <div class="stat"><b>30×</b><span>ROI in 3 months</span></div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <span class="pill">Event Leads</span>
+          <span class="pill">Location Leads</span>
+          <span class="pill">Supplier Leads</span>
+          <span class="pill">Live Automation</span>
+          <span class="pill">Exact Business Logic</span>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN -->
+      <aside class="stack">
+        <section class="card" id="features">
+          <h3>Key Features</h3>
+          <div class="twoCol">
+            <div class="mini">
+              <h3 style="margin:0 0 8px;">Event Leads</h3>
+              <ul>
+                <li>Find companies exhibiting near your hotel.</li>
+                <li>Qualify by event type, company profile, and job titles.</li>
+              </ul>
+            </div>
+            <div class="mini">
+              <h3 style="margin:0 0 8px;">Location Leads</h3>
+              <ul>
+                <li>Target companies by office locations and proximity signals.</li>
+                <li>Drill down to GPS-level location insights.</li>
+              </ul>
+            </div>
+            <div class="mini">
+              <h3 style="margin:0 0 8px;">Supplier Intelligence</h3>
+              <ul>
+                <li>Benchmark products across ecommerce sources.</li>
+                <li>Compare price, availability, and supplier options.</li>
+              </ul>
+            </div>
+            <div class="mini">
+              <h3 style="margin:0 0 8px;">Data Workflows</h3>
+              <ul>
+                <li>Automate complex business logic end-to-end.</li>
+                <li>Rewards, partner fees, qualification rules, more.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" id="gcp">
+          <h3>Google Cloud Integration</h3>
+          <p style="margin:0 0 10px; color:var(--muted); line-height:1.6; font-size:13px;">
+            ByteGenie runs data ingestion, analytics, and ML workloads on Google Cloud for scalable, real-time intelligence.
+          </p>
+          <div class="mini">
+            <div class="codeTag">Cloud Storage</div>
+            <p style="margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.6;">
+              Store raw and normalized datasets from web and internal sources.
+            </p>
+          </div>
+          <div class="mini">
+            <div class="codeTag">BigQuery</div>
+            <p style="margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.6;">
+              Fast querying, benchmarking, and historical trend analysis across events, locations, and suppliers.
+            </p>
+          </div>
+          <div class="mini">
+            <div class="codeTag">Vertex AI</div>
+            <p style="margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.6;">
+              ML models qualify leads, detect high-intent prospects, and power pricing & supplier analytics.
+            </p>
+          </div>
+          <div class="mini">
+            <div class="codeTag">Cloud Run</div>
+            <p style="margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.6;">
+              Serverless automation for live workflows and continuously refreshed intelligence.
+            </p>
+          </div>
+        </section>
+
+        <section class="card" id="contact">
+          <h3>Contact</h3>
+          <p style="margin:0 0 12px; color:var(--muted); line-height:1.6; font-size:13px;">
+            Reach out for a demo, integrations, or a proof-of-value pilot.
+          </p>
+          <div class="mini" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div>
+              <div style="font-weight:700;">Email</div>
+              <div style="color:var(--muted); font-size:13px;">jiale@byte-genie.cloud</div>
+            </div>
+            <button class="btn primary" id="copyEmail2" type="button">Copy</button>
+          </div>
+          <div class="mini">
+            <div style="font-weight:700; margin-bottom:6px;">Solution (short)</div>
+            <div style="color:var(--muted); font-size:13px; line-height:1.6;">
+              AI-powered hospitality sales & procurement intelligence built on Google Cloud (BigQuery, Vertex AI, Cloud Run, Cloud Storage).
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <footer>
+      <div>© <span id="year"></span> ByteGenie. All rights reserved.</div>
+      <div>
+        <a class="link" href="#solution">Back to top</a>
+        <span style="opacity:.6;"> · </span>
+        <a class="link" href="#gcp">Google Cloud</a>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Copied to clipboard</div>
+
+  <script>
+    // Year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Copy helpers
+    const email = "jiale@byte-genie.cloud";
+    const toast = document.getElementById("toast");
+    function showToast(msg){
+      toast.textContent = msg || "Copied to clipboard";
+      toast.classList.add("show");
+      setTimeout(()=> toast.classList.remove("show"), 1200);
+    }
+    async function copyText(txt){
+      try{
+        await navigator.clipboard.writeText(txt);
+        showToast("Email copied");
+      }catch(e){
+        // Fallback
+        const ta = document.createElement("textarea");
+        ta.value = txt;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        showToast("Email copied");
+      }
+    }
+    document.getElementById("copyEmail").addEventListener("click", ()=> copyText(email));
+    document.getElementById("copyEmail2").addEventListener("click", ()=> copyText(email));
+
+    // Subtle floating motion
+    const floats = [...document.querySelectorAll(".float")];
+    let t = 0;
+    function animate(){
+      t += 0.008;
+      floats.forEach((el, i)=>{
+        const amp = 10 + i * 4;
+        const x = Math.sin(t + i) * amp;
+        const y = Math.cos(t * 1.15 + i) * (amp * 0.8);
+        el.style.translate = `${x}px ${y}px`;
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>
